@@ -10,18 +10,30 @@
     <button class="button">Send</button>
 
     <script>
-        let socket = new WebSocket('ws://localhost:8000/echo');
+        let socket = new WebSocket('ws://localhost:8000/join');
+
+        let initialState = {
+            "type": "game",
+            "game": {
+                "id": "yellow-sticky-fish",
+                "players": []
+            }
+        };
 
         socket.onopen = function(event) {
             console.log("socket open");
 
-            // Send an initial message
-            socket.send('I am the client and I\'m listening!');
+            console.log("sending initial state");
+            socket.send(initialState);
             
             // Listen for messages
             socket.onmessage = function(event) {
                 console.log('Client received a message',event);
             };
+
+            socket.onerror = (error) => {
+                console.error("something went wrong", error);
+            }
         }
         let input = document.querySelector(".input-text");
         let button = document.querySelector(".button");
