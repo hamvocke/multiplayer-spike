@@ -11,3 +11,5 @@ Starting the naked flask server (using `flask run` or `pipenv run flask run`) wo
 pipenv install
 ./start.sh
 ```
+
+...and then go check out <http://localhost:8000> and open your browser console.
