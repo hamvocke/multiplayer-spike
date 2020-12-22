@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiting Room</title>
+</head>
+<body>
+    <h1>Game: {{ game_slug }}</h1>
+    <h2>Players</h2>
+    <ul>
+        {% for player in players %}
+        <li>{{ player }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
