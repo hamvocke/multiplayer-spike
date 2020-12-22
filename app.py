@@ -15,11 +15,11 @@ def hello():
 def join_socket(ws):
     while not ws.closed:
         message = ws.receive()
+
         payload = json.loads(message)
 
-        if payload["type"] == "game":
+        if payload is not None and payload["type"] == "game":
             print("received a game message")
-            game = payload["game"]
         
         ws.send(json.dumps(game))
 

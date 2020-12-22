@@ -24,7 +24,7 @@
             console.log("socket open");
 
             console.log("sending initial state");
-            socket.send(initialState);
+            socket.send(JSON.stringify(initialState));
             
             // Listen for messages
             socket.onmessage = function(event) {
