@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Spike</title>
+</head>
+<body>
+    <input class="input-text" type="text" name="text" />
+    <button class="button">Send</button>
+
+    <script>
+        let socket = new WebSocket('ws://localhost:8000/echo');
+
+        socket.onopen = function(event) {
+            console.log("socket open");
+
+            // Send an initial message
+            socket.send('I am the client and I\'m listening!');
+            
+            // Listen for messages
+            socket.onmessage = function(event) {
+                console.log('Client received a message',event);
+            };
+        }
+        let input = document.querySelector(".input-text");
+        let button = document.querySelector(".button");
+
+        button.addEventListener("click", (event) => {
+            let text = input.value;
+
+            if(socket.OPEN) {
+                socket.send(text);
+            }
+            
+        });
+    </script>
+</body>
+</html>
