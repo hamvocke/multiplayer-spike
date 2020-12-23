@@ -6,12 +6,54 @@
     <title>Waiting Room</title>
 </head>
 <body>
-    <h1>Game: {{ game_slug }}</h1>
+    <h1 data-slug={{game_slug}}>Game: {{ game_slug }}</h1>
     <h2>Players</h2>
-    <ul>
+    <ul class="players">
         {% for player in players %}
         <li>{{ player }}</li>
         {% endfor %}
     </ul>
+
+
+    <script>
+        let socket = new WebSocket('ws://localhost:8000/game/socket');
+        let game_slug = document.querySelector("h1").dataset["slug"];
+
+        socket.onopen = function(event) {
+            console.log("socket open");
+
+            let joinMessage = {
+                type: "join",
+                player: "some player",
+                game_slug: game_slug 
+            }
+            let msg = JSON.stringify(joinMessage);
+            console.log(msg);
+            socket.send(msg);
+            
+            // Listen for messages
+            socket.onmessage = function(event) {
+                let data = JSON.parse(event.data)
+                console.log('Client received a message', event);
+
+                if (data.status === "success") {
+                    let game_data = data.message;
+                    game_data.players.forEach(p => {
+                        let newItem = document.createElement("li")
+                        newItem.innerText(p);
+                        document.querySelector(".players").appendChild(newItem);
+                    });
+                }
+
+                if (data.status === "error") {
+                    console.error(data.message);
+                }
+            };
+
+            socket.onerror = (error) => {
+                console.error("something went wrong", error);
+            }
+        }
+    </script>
 </body>
 </html>
