@@ -29,8 +29,30 @@ Notes
 * first player who joins becomes the owner
 * when connecting, we generate a player id and store it in a cookie so we can reconnect the right players
 * how to deal with disconnects? quit game? let players join again? allow other players to take over?
+* how do things scale? with stateful connections, horizontal scaling becomes far less trivial and requires coordination between servers
 
 ## Events 
+
+### Table-specific
+_All messages are sent for a specific table_
+
+| event name | description | payload |
+| ---------- | ----------- | --- |
+| `join table` | a player joins a table | player info (name, id) |
+| `joined table` | broadcast, a player joined a table | table owner's game state |
+| `leave table` | a player leaves a table | player info (id) |
+| `left table` | broadcast, a player left a table | player info (id) |
+| `play card` | a player plays a card | player id, card |
+| `played card` | broadcast, a player played a card | player id, card |
+| `make announcement` | a player makes an announcement | player id, announcement |
+| `made announcement` | broadcast, a player made an announcement | player id, announcement |
+| `start game` | the owner starts the game | |
+| `started game` | broadcast, the owner starts the game | |
+| `finish round` | the owner finished the round | |
+| `finish round` | broadcast, the owner finished the round | |
+| `start next round` | the owner starts the next round | |
+| `started next round` | broadcast, the owner started the next round | |
+
 
 ### `Connect`
 * if first player:
