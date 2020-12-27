@@ -100,3 +100,29 @@ _All messages are sent for a specific table_
 * send entire game state of owner
 * broadcast game state to all players on table
 * client: start next round with provided state (effectively: players and their hands need to be set)
+
+
+## Flow
+
+### 1. Create new table
+
+1. User clicks _"New Multiplayer Game"_ button
+2. Browser will send a request to the backend:
+   * `HTTP POST /api/game/multiplayer`
+3. Server processes request
+   * generate a game slug
+   * create a new game instance with empty players
+   * respond with the game slug
+4. client will be redirected to `/play/<game-slug>`
+5. browser renders `Game` view that will show the `WaitingRoom` component listing the owner as the only player
+
+### 2. Join a table
+1. User opens `/play/<game-slug>` in their browser
+2. Browser looks up player info (guid, name) from cookie or generates new 
+2. Browser establishes a websocket connection to `/ws/game/<game-slug>`
+3. Server receives `connect` event including player info (guid, name)
+4. Server looks up game by `game-slug`
+5. if game is already started (player.count >= 4?), it refuses the connection
+6. else, server creates player instance, attaches it to game (role = `owner` if it's the first player)
+7. persist game
+8. broadcast `player joined` event including player info to all clients in the `game-slug` room
