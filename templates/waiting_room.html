@@ -8,11 +8,7 @@
 <body>
     <h1 data-slug={{game_slug}}>Game: {{ game_slug }}</h1>
     <h2>Players</h2>
-    <ul class="players">
-        {% for player in players %}
-        <li>{{ player }}</li>
-        {% endfor %}
-    </ul>
+    <ul class="players"></ul>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js" crossorigin="anonymous"></script>
     <script>
@@ -20,10 +16,21 @@
             return `player-${Math.random()}`;
         }
 
+        function uuidv4() {
+            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
+        }
+
+        // TODO: store guid in cookie
+
         let socket = io();
         let game_slug = document.querySelector("h1").dataset["slug"];
         let joinMessage = {
-                "player": generatePlayerName(),
+                "player": {
+                    "guid": uuidv4(),
+                    "name": generatePlayerName()
+                },
                 "game_slug": game_slug 
             }
 
@@ -32,11 +39,11 @@
         socket.on('joined', function(msg) {
             console.log("joined", msg)
             let data = JSON.parse(msg);
-            data.players.forEach(p => {
+            for(player in data) {
                 let newItem = document.createElement("li");
-                newItem.innerText = p;
-                document.querySelector(".players").appendChild(newItem);
-            });
+                newItem.innerText = data[player];
+                document.querySelector(".players").appendChild(newItem)
+            }
         });
     </script>
 </body>
