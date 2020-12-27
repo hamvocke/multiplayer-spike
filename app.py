@@ -1,10 +1,11 @@
 from flask import Flask, render_template, redirect, url_for, abort
-from flask_sockets import Sockets
+from flask_socketio import SocketIO, send, emit
 import json
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'supersecret'
 app.debug = True
-sockets = Sockets(app)
+socketio = SocketIO(app)
 
 all_games = {}
 
@@ -46,27 +47,35 @@ def game(game_slug):
     return render_template('waiting_room.html', game_slug=g["slug"], players=g["players"])
 
 
-@sockets.route('/game/socket')
-def game_socket(ws):
-    while not ws.closed:
-        message = ws.receive()
-
-        payload = json.loads(message)
-        print("received message " + message)
+@socketio.on('connect')
+def on_connect():
+    print("a new connection")
 
 
-        if payload["type"] == "join":
-            player = payload["name"]
-            game_slug = payload["game_slug"]
-            print(f"{player} joined {game_slug}")
+@socketio.on('join')
+def game_socket(data):
 
-            g = all_games.get(game_slug, None)
+        print("received message " + str(data))
+        payload = json.loads(str(data))
 
-            if g is None:
-                ws.send(json.dumps({"status": "error", "message": f"game {game_slug} does not exist"}))
-            else:
-                for client in ws.handler.server.clients.values():
-                    client.ws.send(json.dumps({"status": "success", "message": g}))
+        player = payload["player"]
+        game_slug = payload["game_slug"]
+        print(f"{player} joined {game_slug}")
+
+        g = all_games.get(game_slug, None)
+        
+        if (player in g["players"]):
+            print(f"player {player} already joined")
+            return
+            
+        g["players"].append(player)
+
+        if g is None:
+            print("error")
+            emit("error", f"game {game_slug} does not exist")
+        else:
+            print("emitting")
+            emit("joined", json.dumps(g), broadcast=True)
 
 
 if __name__ == "__main__":
