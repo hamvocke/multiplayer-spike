@@ -139,3 +139,4 @@ _All messages are sent for a specific table_
 
 ## Open Questions
 * can we send data on "disconnect" events?
+* how to handle server restarts?
