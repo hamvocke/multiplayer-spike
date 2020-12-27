@@ -105,7 +105,6 @@ _All messages are sent for a specific table_
 ## Flow
 
 ### 1. Create new table
-
 1. User clicks _"New Multiplayer Game"_ button
 2. Browser will send a request to the backend:
    * `HTTP POST /api/game/multiplayer`
@@ -119,10 +118,24 @@ _All messages are sent for a specific table_
 ### 2. Join a table
 1. User opens `/play/<game-slug>` in their browser
 2. Browser looks up player info (guid, name) from cookie or generates new 
-2. Browser establishes a websocket connection to `/ws/game/<game-slug>`
-3. Server receives `connect` event including player info (guid, name)
-4. Server looks up game by `game-slug`
-5. if game is already started (player.count >= 4?), it refuses the connection
-6. else, server creates player instance, attaches it to game (role = `owner` if it's the first player)
-7. persist game
-8. broadcast `player joined` event including player info to all clients in the `game-slug` room
+3. Browser establishes a websocket connection to `/ws/game/<game-slug>`
+4. Server receives `connect` event including player info (guid, name)
+5. Server looks up game by `game-slug`
+6. if game is already started (player.count >= 4?), it refuses the connection
+7. else, server tries to find or creates player instance (guid, name, socket id, status), attaches it to game (role = `owner` if it's the first player), sets status to `online`
+8. persist game
+9. broadcast `player joined` event including player info to all clients in the `<game-slug>` room
+
+### 3. Leave a table
+1. User closes the `/play/<game-slug>` browser tab
+2. Server receives `disconnect` event (can we send additional data here?)
+3. Server looks up game by `game-slug`
+7. server creates finds player instance (by socket id or player info), updates the `status` to `offline`
+8. persist game
+9. broadcast `player left` event including player info to all clients in the `<game-slug>` room
+
+### 4. Reconnect to a table
+* like "join", find the player in the list of players, update status to `online`, broadcast
+
+## Open Questions
+* can we send data on "disconnect" events?
