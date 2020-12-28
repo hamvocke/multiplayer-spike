@@ -19,8 +19,9 @@ class Game(object):
             3: None
         }
 class Player(object):
-    def __init__(self, guid, name, state):
+    def __init__(self, guid, session_id, name, state):
         self.guid = guid
+        self.session_id = session_id
         self.name = name
         self.state = state
 
@@ -36,7 +37,7 @@ def serialize_players(players):
         if p is None:
             allPlayers[index] = None
         else:
-            allPlayers[index] = {"name": p.name, "state": p.state}
+            allPlayers[index] = {"guid": p.guid, "name": p.name, "state": p.state}
     return allPlayers
 
 slug_generator = generate_game_slug()
@@ -80,7 +81,7 @@ def on_join(data):
         print("join")
 
         payload = json.loads(data)
-        player = Player(payload["player"]["guid"], payload["player"]["name"], "online")
+        player = Player(payload["player"]["guid"], request.sid, payload["player"]["name"], "online")
         game_slug = payload["game_slug"]
 
         join_room(game_slug)
@@ -112,6 +113,19 @@ def on_join(data):
         broadcast_data = json.dumps(serialize_players(g.players))
         print(f"player joined. broadcasting {broadcast_data}")
         emit("joined", broadcast_data, room=game_slug)
+
+
+@socketio.on('disconnect')
+def on_disconnect():
+    print("a player left")
+
+    for g in all_games.values():
+        for p in g.players.values():
+            if p is not None and p.session_id == request.sid:
+                p.state = "offline"
+                broadcast_data = json.dumps(serialize_players(g.players))
+                print(f"broadcasting {broadcast_data} after leaving")
+                emit("left", broadcast_data, room=g.slug)
 
 
 if __name__ == "__main__":

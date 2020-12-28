@@ -43,8 +43,20 @@
                 let player = data[index];
                 if (!player) continue;
                 let newItem = document.createElement("li");
-                newItem.innerText = `${data[index].name} (${data[index].state})`;
+                newItem.dataset["guid"] = player.guid;
+                newItem.innerText = `${player.name} (${player.state})`;
                 document.querySelector(".players").appendChild(newItem)
+            }
+        });
+
+        socket.on('left', function(msg) {
+            console.log("left", msg)
+            let data = JSON.parse(msg);
+            for(index in data) {
+                let player = data[index];
+                if (!player) continue;
+                let listItem = document.querySelector(`li[data-guid='${player.guid}'`);
+                listItem.innerText = `${player.name} (${player.state})`;
             }
         });
     </script>
