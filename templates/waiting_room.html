@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waiting Room</title>
+    <style>
+        .online {
+            color: lightseagreen;
+        }
+
+        .offline {
+            color: crimson;
+        }
+    </style>
 </head>
 <body>
     <h1 data-slug={{game_slug}}>Game: {{ game_slug }}</h1>
@@ -12,13 +21,15 @@
 
     <button class="the-button">Click me</button>
 
+    <ol class="log"></ol>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js" crossorigin="anonymous"></script>
     <script>
         function generatePlayerName() {
             const animals = ["cat", "dog", "fish", "turtle", "otter", "cow", "crocodile", "pig", "dove", "bee"];
             const adjectives = ["fast", "slow", "eager", "lazy", "sleepy", "hungry", "funny", "wild"];
             const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-            const randomAnima = animals[Math.floor(Math.random() * animals.length)];
+            const randomAnimal = animals[Math.floor(Math.random() * animals.length)];
             return `${randomAdjective}-${randomAnimal}`;
         }
 
@@ -51,6 +62,7 @@
                 let newItem = document.createElement("li");
                 newItem.dataset["guid"] = player.guid;
                 newItem.innerText = `${player.name} (${player.state})`;
+                newItem.className = player.state;
                 document.querySelector(".players").appendChild(newItem)
             }
         });
@@ -63,11 +75,17 @@
                 if (!player) continue;
                 let listItem = document.querySelector(`li[data-guid='${player.guid}'`);
                 listItem.innerText = `${player.name} (${player.state})`;
+                listItem.className = player.state;
+
             }
         });
 
         socket.on("clicked", function(msg) {
             console.log(msg);
+
+            let newItem = document.createElement("li");
+            newItem.innerText = `${new Date()}: ${msg}`;
+            document.querySelector(".log").appendChild(newItem)
         });
 
         document.querySelector(".the-button").onclick = function() {
