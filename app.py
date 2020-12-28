@@ -115,6 +115,15 @@ def on_join(data):
     emit("joined", broadcast_data, room=game_slug)
 
 
+@socketio.on('click')
+def on_click(data):
+    print("someone clicked")
+    payload = json.loads(data)
+    player = payload["player"]
+
+    emit("clicked", f"{player['name']} clicked", room=payload["game_slug"])
+
+
 @socketio.on('disconnect')
 def on_disconnect():
     print("a player left")

@@ -10,6 +10,8 @@
     <h2>Players</h2>
     <ul class="players"></ul>
 
+    <button class="the-button">Click me</button>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js" crossorigin="anonymous"></script>
     <script>
         function generatePlayerName() {
@@ -59,6 +61,14 @@
                 listItem.innerText = `${player.name} (${player.state})`;
             }
         });
+
+        socket.on("clicked", function(msg) {
+            console.log(msg);
+        });
+
+        document.querySelector(".the-button").onclick = function() {
+            socket.emit('click', JSON.stringify(joinMessage));
+        };
     </script>
 </body>
 </html>
