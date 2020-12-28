@@ -78,41 +78,41 @@ def on_connect():
 
 @socketio.on('join')
 def on_join(data):
-        print("join")
+    print("join")
 
-        payload = json.loads(data)
-        player = Player(payload["player"]["guid"], request.sid, payload["player"]["name"], "online")
-        game_slug = payload["game_slug"]
+    payload = json.loads(data)
+    player = Player(payload["player"]["guid"], request.sid, payload["player"]["name"], "online")
+    game_slug = payload["game_slug"]
 
-        join_room(game_slug)
-        print(f"{player.name} joined {game_slug}")
+    join_room(game_slug)
+    print(f"{player.name} joined {game_slug}")
 
-        g = all_games.get(game_slug, None)
+    g = all_games.get(game_slug, None)
 
-        if g is None:
-            print("error")
-            emit("error", f"game {game_slug} does not exist")
-            return
+    if g is None:
+        print("error")
+        emit("error", f"game {game_slug} does not exist")
+        return
 
-        found = False
+    found = False
 
-        for (i, p) in g.players.items():
-            if p is not None and p.guid == player.guid:
-                print("found existing player for this guid. updating")
-                g.players[i] = p
-                found = True
+    for (i, p) in g.players.items():
+        if p is not None and p.guid == player.guid:
+            print("found existing player for this guid. updating")
+            g.players[i] = p
+            found = True
+            break
+
+    if not found:
+        for index, p in g.players.items():
+            if p is None:
+                print("new player is unknown, adding as new player")
+                g.players[index] = player
                 break
 
-        if not found:
-            for index, p in g.players.items():
-                if p is None:
-                    print("new player is unknown, adding as new player")
-                    g.players[index] = player
-                    break
-
-        broadcast_data = json.dumps(serialize_players(g.players))
-        print(f"player joined. broadcasting {broadcast_data}")
-        emit("joined", broadcast_data, room=game_slug)
+    broadcast_data = json.dumps(serialize_players(g.players))
+    print(f"player joined. broadcasting {broadcast_data}")
+    emit("joined", broadcast_data, room=game_slug)
 
 
 @socketio.on('disconnect')
