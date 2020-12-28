@@ -15,7 +15,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.min.js" crossorigin="anonymous"></script>
     <script>
         function generatePlayerName() {
-            return `player-${Math.random()}`;
+            const animals = ["cat", "dog", "fish", "turtle", "otter", "cow", "crocodile", "pig", "dove", "bee"];
+            const adjectives = ["fast", "slow", "eager", "lazy", "sleepy", "hungry", "funny", "wild"];
+            const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const randomAnima = animals[Math.floor(Math.random() * animals.length)];
+            return `${randomAdjective}-${randomAnimal}`;
         }
 
         function uuidv4() {
