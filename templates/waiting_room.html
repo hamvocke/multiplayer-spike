@@ -39,9 +39,11 @@
         socket.on('joined', function(msg) {
             console.log("joined", msg)
             let data = JSON.parse(msg);
-            for(player in data) {
+            for(index in data) {
+                let player = data[index];
+                if (!player) continue;
                 let newItem = document.createElement("li");
-                newItem.innerText = data[player];
+                newItem.innerText = `${data[index].name} (${data[index].state})`;
                 document.querySelector(".players").appendChild(newItem)
             }
         });

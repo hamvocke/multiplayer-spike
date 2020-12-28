@@ -36,7 +36,7 @@ def serialize_players(players):
         if p is None:
             allPlayers[index] = None
         else:
-            allPlayers[index] = p.name
+            allPlayers[index] = {"name": p.name, "state": p.state}
     return allPlayers
 
 slug_generator = generate_game_slug()
