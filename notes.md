@@ -139,4 +139,11 @@ _All messages are sent for a specific table_
 
 ## Open Questions
 * can we send data on "disconnect" events?
-* how to handle server restarts?
+
+### how to handle server restarts?
+
+Socket connections are persistent, if a server restarts (e.g. due to a deployment) than we can't ingest incoming messages for the time being. Another problem could be the loss of open sockets - a server shutting down will lose its local state and disconnect open sockets. Clients will reconnect once the server comes back to life but we need to make sure that the server actively re-binds incoming connections to the previously known state so clients can continue without any interruption.
+
+Handling downtime is probably best served with displaying client-side error messages saying that all servers are temporarily offline and that they should try again in a few seconds (can detect socket connection being offline in order to show those).
+
+Reconnecting sockets could be a manual thing. Or we can rely on out of the box mechanisms for distributed and persistent socket handling like Django Channels' channel layer feature. We could spin up a Redis instance to store socket information even if the application itself gets restarted. The downside is that we have to manage (and pay for) a Redis instance. We could also get away with storing this information in an already existing SQL database. Downside here is that we can't use any of the automatic Redis communication handling that frameworks like Django Channels and others offer. Benefit is that we don't have to host yet another piece of infrastructure.
