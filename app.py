@@ -1,13 +1,12 @@
 from flask import Flask, render_template, redirect, url_for, abort, request, session
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
 import json
+import pickle
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecret'
 app.debug = True
 socketio = SocketIO(app)
-
-all_games = {}
 
 class Game(object):
     def __init__(self, slug: str):
@@ -40,6 +39,23 @@ def serialize_players(players):
             allPlayers[index] = {"guid": p.guid, "name": p.name, "state": p.state}
     return allPlayers
 
+def save():
+    try:
+        with open('games.p', 'wb') as f:
+            pickle.dump(all_games, f)
+            print("saved")
+    except IOError:
+        print("COULDN'T SAVE")
+
+def load():
+    try:
+        with open('games.p', 'rb') as f:
+            return pickle.load(f)
+    except IOError:
+        return {}
+
+all_games = load()
+
 slug_generator = generate_game_slug()
 
 @app.route('/')
@@ -57,6 +73,7 @@ def new_game():
     slug = next(slug_generator)
     game = Game(slug)
     all_games[slug] = game
+    save()
     print(f"created new game: {slug}")
     return redirect(url_for('game_view', game_slug=game.slug))
 
@@ -110,6 +127,7 @@ def on_join(data):
                 g.players[index] = player
                 break
 
+    save()
     broadcast_data = json.dumps(serialize_players(g.players))
     print(f"player joined. broadcasting {broadcast_data}")
     emit("joined", broadcast_data, room=game_slug)
@@ -133,6 +151,7 @@ def on_disconnect():
             if p is not None and p.session_id == request.sid:
                 p.state = "offline"
                 broadcast_data = json.dumps(serialize_players(g.players))
+                save()
                 print(f"broadcasting {broadcast_data} after leaving")
                 emit("left", broadcast_data, room=g.slug)
 
