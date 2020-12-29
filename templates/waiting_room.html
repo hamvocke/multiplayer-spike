@@ -64,7 +64,10 @@
         document.querySelector(".name").innerText = name;
         document.querySelector(".guid").innerText = guid;
 
-        socket.emit('join', JSON.stringify(joinMessage));
+        // send join message after every (re-)connection
+        socket.on("connect", () => {
+            socket.emit('join', JSON.stringify(joinMessage));
+        });
 
         socket.on('joined', function(msg) {
             console.log("joined", msg)
