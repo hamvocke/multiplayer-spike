@@ -139,7 +139,7 @@ def on_click(data):
     player = payload["player"]
     print(f"{player} clicked")
 
-    emit("clicked", f"{player['name']} clicked", room=payload["game_slug"])
+    emit("clicked", f"{player['name']} clicked", to=payload["game_slug"])
 
 
 @socketio.on('disconnect')
