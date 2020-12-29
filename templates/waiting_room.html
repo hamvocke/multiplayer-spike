@@ -23,6 +23,7 @@
 </head>
 <body>
     <h1 data-slug={{game_slug}}>Game: {{ game_slug }}</h1>
+    <h2>Player: <small class="guid"></small> <small class="name"></small></h2>
     <h2>Players</h2>
     <ul class="players"></ul>
 
@@ -50,24 +51,29 @@
 
         let socket = io();
         let game_slug = document.querySelector("h1").dataset["slug"];
+        let name = generatePlayerName();
+        let guid = uuidv4();
         let joinMessage = {
                 "player": {
-                    "guid": uuidv4(),
-                    "name": generatePlayerName()
+                    "guid": guid,
+                    "name": name
                 },
                 "game_slug": game_slug 
-            }
+            };
+
+        document.querySelector(".name").innerText = name;
+        document.querySelector(".guid").innerText = guid;
 
         socket.emit('join', JSON.stringify(joinMessage));
 
         socket.on('joined', function(msg) {
             console.log("joined", msg)
             let data = JSON.parse(msg);
+            document.querySelector(".players").innerHTML = "";
             for(index in data) {
                 let player = data[index];
                 if (!player) continue;
                 let newItem = document.createElement("li");
-                newItem.dataset["guid"] = player.guid;
                 newItem.innerText = `${player.name} (${player.state})`;
                 newItem.className = player.state;
                 document.querySelector(".players").appendChild(newItem)
@@ -77,13 +83,14 @@
         socket.on('left', function(msg) {
             console.log("left", msg)
             let data = JSON.parse(msg);
+            document.querySelector(".players").innerHTML = "";
             for(index in data) {
                 let player = data[index];
                 if (!player) continue;
-                let listItem = document.querySelector(`li[data-guid='${player.guid}'`);
-                listItem.innerText = `${player.name} (${player.state})`;
-                listItem.className = player.state;
-
+                let newItem = document.createElement("li");
+                newItem.innerText = `${player.name} (${player.state})`;
+                newItem.className = player.state;
+                document.querySelector(".players").appendChild(newItem)
             }
         });
 

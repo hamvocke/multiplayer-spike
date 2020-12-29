@@ -135,9 +135,9 @@ def on_join(data):
 
 @socketio.on('click')
 def on_click(data):
-    print("someone clicked")
     payload = json.loads(data)
     player = payload["player"]
+    print(f"{player} clicked")
 
     emit("clicked", f"{player['name']} clicked", room=payload["game_slug"])
 
